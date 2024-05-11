@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// ignore: unused_import
 import 'package:hive/categories_sub_categories_screen/categories_sub_categories_screen.dart';
 // ignore: unused_import
 import 'package:hive/image_slider.dart';
@@ -53,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/login_background.png'),
+            image: AssetImage('images/login_background.jpg'),
             fit: BoxFit.cover,
           ),
         ),
@@ -124,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CategoriesSubCategoriesScreen(),
+                        builder: (context) => SignUpScreen(),
                       ),
                     );
                   },

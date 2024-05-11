@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
-class tripspage extends StatelessWidget {
+class tripsPage extends StatelessWidget {
   final List<Map<String, dynamic>> _trips = [
     {
       'destination': 'Paris',
       'price': '₹99999',
-      'image': 'https://example.com/paris.jpg',
+      'image': 'assets/images/paris.jpg',
       'description': 'Experience the romance of the City of Light!',
     },
     {
       'destination': 'New York',
       'price': '₹79999',
-      'image': "images/image1.jpg",
+      'image': "assets/images/new_york.jpg",
       'description': 'Explore the bustling streets of the Big Apple!',
     },
     {
       'destination': 'Tokyo',
       'price': '₹89999',
-      'image': 'https://example.com/tokyo.jpg',
+      'image': 'assets/images/tokyo.jpg',
       'description': 'Discover the fusion of tradition and modernity!',
     },
     // Add more trip details here
@@ -88,12 +87,9 @@ class TripCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: CachedNetworkImage(
-          imageUrl: trip['image'],
+        child: Image.asset(
+          trip['images/Trip-bro.png'],
           fit: BoxFit.cover,
-          placeholder: (context, url) =>
-              Center(child: CircularProgressIndicator()),
-          errorWidget: (context, url, error) => Icon(Icons.error),
         ),
       ),
     );
@@ -116,12 +112,9 @@ class TripDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CachedNetworkImage(
-              imageUrl: trip['image'],
+            Image.asset(
+              trip['image'],
               fit: BoxFit.cover,
-              placeholder: (context, url) =>
-                  Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) => Icon(Icons.error),
             ),
             SizedBox(height: 20),
             Text(

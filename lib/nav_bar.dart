@@ -11,7 +11,7 @@ class CustomBottomMenu extends StatefulWidget {
   List<Widget> screens = [
     ImageSliders(),
     Settings(),
-    tripspage(),
+    tripsPage(),
     AccountScreen(),
   ];
   List<String> screenNames = ['Home', 'Settings', 'notifcatons', 'Profile'];

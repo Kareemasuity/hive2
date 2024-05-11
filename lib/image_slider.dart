@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:hive/Nav_bar.dart';
+// ignore: unused_import
+import 'package:hive/categories_sub_categories_screen/categories_sub_categories_screen.dart';
+import 'package:hive/sports.dart';
+import 'package:hive/trips_page.dart';
 
 class ImageSliders extends StatefulWidget {
-  const ImageSliders({super.key});
+  const ImageSliders({Key? key}) : super(key: key);
 
   @override
   _ImageSlidersState createState() => _ImageSlidersState();
 }
 
 class _ImageSlidersState extends State<ImageSliders> {
-  final List<Map<String, dynamic>> categories = [
-    {'name': 'Category 1', 'icon': Icons.home},
-    {'name': 'Category 2', 'icon': Icons.star},
-    {'name': 'Category 3', 'icon': Icons.person},
-    {'name': 'Category 1', 'icon': Icons.home},
-    {'name': 'Category 1', 'icon': Icons.home},
-    {'name': 'Category 1', 'icon': Icons.home},
-    {'name': 'Category 1', 'icon': Icons.home},
-    {'name': 'Category 1', 'icon': Icons.home},
-    // Add more categories with their respective icons
+  final List<Map<String, String>> categories = [
+    {"name": "Sports"},
+    {"name": "Culture"},
+    {"name": "science"},
+    {"name": "families"},
+    {"name": "Art"},
+    {"name": "Rovers"},
+    {"name": "other actvites"},
   ];
 
   @override
@@ -42,7 +44,7 @@ class _ImageSlidersState extends State<ImageSliders> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Welcome to Hive!',
+              '',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
@@ -76,7 +78,8 @@ class _ImageSlidersState extends State<ImageSliders> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
+                          color:
+                              Color.fromARGB(255, 38, 14, 146).withOpacity(0.5),
                           spreadRadius: 3,
                           blurRadius: 5,
                           offset: Offset(0, 2),
@@ -84,9 +87,9 @@ class _ImageSlidersState extends State<ImageSliders> {
                       ],
                     ),
                     child: Center(
-                      child: Icon(
-                        categories[index]['icon'],
-                        size: 30,
+                      child: Text(
+                        categories[index]["name"]!,
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
@@ -97,24 +100,105 @@ class _ImageSlidersState extends State<ImageSliders> {
           Expanded(
             child: Column(
               children: [
-                Card(
-                  child: Container(
-                    height: 100, // First card with fixed height
-                    color: const Color.fromARGB(255, 60, 127, 181),
-                    child: Center(
-                      child: Text('Trips'),
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => tripsPage(),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40.0),
+                    ),
+                    child: Container(
+                      width:
+                          double.infinity, // Makes the card expand horizontally
+                      height: 120, // Adjust the height as needed
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color.fromARGB(255, 27, 191, 194),
+                            const Color.fromARGB(255, 238, 233, 233)
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Positioned(
+                            bottom: 10,
+                            left: 10,
+                            child: Text(
+                              'Trips',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          // Add your Curology product image here
+                          Image.asset('images/Trip-bro.png'),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                Card(
-                  child: Container(
-                    height: 90, // Second card with larger height
-                    color: Color.fromARGB(136, 38, 156, 211),
-                    child: Center(
-                      child: Text('comp'),
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SportsPage(),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40.0),
+                    ),
+                    child: Container(
+                      width:
+                          double.infinity, // Makes the card expand horizontally
+                      height: 120, // Adjust the height as needed
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color.fromARGB(255, 89, 94, 229),
+                            const Color.fromARGB(255, 238, 233, 233)
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Positioned(
+                            bottom: 10,
+                            left: 10,
+                            child: Text(
+                              'competitions',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          // Add your Curology product image here
+                          Image.asset('images/Achievement.png'),
+                        ],
+                      ),
                     ),
                   ),
                 ),
+                // ... Your second card remains here
               ],
             ),
           ),
