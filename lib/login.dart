@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // ignore: unused_import
 import 'package:hive/categories_sub_categories_screen/categories_sub_categories_screen.dart';
+import 'package:hive/committees.dart';
 // ignore: unused_import
 import 'package:hive/image_slider.dart';
 // ignore: unused_import
@@ -113,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ImageSliders(),
+                        builder: (context) => Committees(),
                       ),
                     );
                   },

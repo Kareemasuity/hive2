@@ -11,8 +11,24 @@ import 'package:hive/rovers.dart';
 import 'package:hive/science.dart';
 import 'package:hive/sports.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    final client = super.createHttpClient(context);
+
+    // *Only bypass certificate verification in development environments*
+
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
+
+    return client;
+  }
+}
 
 void main() {
+  HttpOverrides.global = MyHttpOverrides();
   runApp(
     ChangeNotifierProvider(
       create: (context) => MemberListProvider(),
