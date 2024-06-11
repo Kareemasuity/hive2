@@ -1,12 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-// ignore: unused_import
-import 'package:hive/categories_sub_categories_screen/categories_sub_categories_screen.dart';
-// ignore: unused_import
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'package:hive/image_slider.dart';
-// ignore: unused_import
+
 import 'package:hive/sign_up.dart';
-// ignore: unused_import
-import 'package:hive/trips_page.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(LoginApp());
@@ -37,11 +37,54 @@ class _LoginScreenState extends State<LoginScreen> {
   String _email = '';
   String _password = '';
 
-  void _submit() {
+  Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      // Perform login action
-      print('Email: $_email, Password: $_password');
+      try {
+        final response = await http.post(
+          Uri.parse('https://localhost:7147/api/Authorization/Login'),
+          body: jsonEncode({'email': _email, 'password': _password}),
+          headers: {'Content-Type': 'application/json'},
+        );
+
+        if (response.statusCode == 200) {
+          final responseData = jsonDecode(response.body);
+          if (responseData['success']) {
+            // Login successful, store tokens
+            final accessToken = responseData['accessToken'];
+            final refreshToken = responseData['refreshToken'];
+
+            // Store tokens securely (you can use flutter_secure_storage package)
+            final storage = FlutterSecureStorage();
+            await storage.write(key: 'access_token', value: accessToken);
+            await storage.write(key: 'refresh_token', value: refreshToken);
+
+            // Navigate to home screen or any other screen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => ImageSliders()),
+            );
+          } else {
+            // Login failed, show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Login failed. Please try again.')),
+            );
+          }
+        } else {
+          // If the server did not return a 200 OK response,
+          // throw an exception.
+          throw Exception('Failed to login');
+        }
+      } catch (e) {
+        // Handle error
+        print('Error during login: $e');
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error during login. Please try again later.'),
+          ),
+        );
+      }
     }
   }
 
@@ -110,12 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Text('Login'),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ImageSliders(),
-                      ),
-                    );
+                    _login;
                   },
                 ),
                 SizedBox(height: 20),
