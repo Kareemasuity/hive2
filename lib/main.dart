@@ -7,6 +7,7 @@ import 'package:hive/activites.dart';
 import 'package:hive/image_slider.dart';
 // ignore: unused_import
 import 'package:hive/login.dart';
+// ignore: unused_import
 import 'package:hive/search.dart';
 import 'package:hive/sign_up.dart';
 
