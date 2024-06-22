@@ -1,82 +1,107 @@
-import 'package:flutter/material.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/material.dart';
+// ignore: unnecessary_import
+import 'package:flutter/services.dart';
+// ignore: unused_import
+import 'package:flutter/animation.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Stylish Sign Up',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: SignUpScreen(),
-    );
-  }
+  _SignUpPageState createState() => _SignUpPageState();
 }
 
-class SignUpScreen extends StatefulWidget {
-  @override
-  _SignUpScreenState createState() => _SignUpScreenState();
-}
-
-class _SignUpScreenState extends State<SignUpScreen> {
+class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _addressController = TextEditingController();
+  late String _email,
+      _password,
+      _phoneNumber,
+      _firstName,
+      _lastName,
+      _birthDate,
+      _nationalId,
+      _addressDetails,
+      _collegeDepartment;
+  late int _gender = 0, _unEntityId, _cityId, _level, _disabilityType;
+  bool _hasDisability = false;
+  File? _imageFile;
 
-  String _email = '';
-  String _password = '';
-  String _phoneNumber = '';
-  String _firstName = '';
-  String _lastName = '';
-  String _birthDate = '';
-  String _nationalId = '';
-  int _gender = 0;
-  String _addressDetails = '';
-  String _imagePath = '';
-  int _unEntityId = 0;
-  String _addressId = '';
-  int _level = 0;
-  String _collegeDepartment = '';
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedFile != null) {
+        _imageFile = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       try {
-        final response = await http.post(
-          Uri.parse('https://10.0.2.2:7147'),
-          body: jsonEncode({
-            'email': _email,
-            'password': _password,
-            'phoneNumber': _phoneNumber,
-            'firstName': _firstName,
-            'lastName': _lastName,
-            'birthDate': _birthDate,
-            'nationalId': _nationalId,
-            'gender': _gender,
-            'addressDetails': _addressDetails,
-            'imagePath': _imagePath,
-            'unEntityId': _unEntityId,
-            'addressId': _addressId,
-            'level': _level,
-            'collegeDepartment': _collegeDepartment,
-          }),
-          headers: {'Content-Type': 'application/json'},
-        );
+        var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(
+                'https://10.0.2.2:7147/api/Authorization/StudentRegister'));
+
+        request.fields['email'] = _email;
+        request.fields['password'] = _password;
+        request.fields['phoneNumber'] = _phoneNumber;
+        request.fields['firstName'] = _firstName;
+        request.fields['lastName'] = _lastName;
+        request.fields['birthDate'] = _birthDate;
+        request.fields['nationalId'] = _nationalId;
+        request.fields['gender'] = _gender.toString();
+        request.fields['addressDetails'] = _addressDetails;
+        request.fields['unEntityId'] = _unEntityId.toString();
+        request.fields['cityId'] = _cityId.toString();
+        request.fields['level'] = _level.toString();
+        request.fields['collegeDepartment'] = _collegeDepartment;
+        request.fields['hasDisability'] = _hasDisability.toString();
+        request.fields['disabilityType'] = _disabilityType.toString();
+
+        if (_imageFile != null) {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'image',
+              _imageFile!.path,
+              contentType:
+                  MediaType('image', 'jpeg'), // Adjust based on the image type
+            ),
+          );
+        }
+
+        final response = await request.send();
+        final responseString = await response.stream.bytesToString();
+        final responseData = jsonDecode(responseString);
 
         if (response.statusCode == 200) {
-          // Registration successful, you can handle it as per your requirement
-          print('Registration successful');
+          print('success');
+          final message = responseData['message'] ?? 'Registration successful';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message)),
+          );
           Navigator.pop(context);
         } else {
+          final message = responseData['message'] ??
+              'Registration failed. Please try again.';
+          final errors = responseData['errors'] ?? {};
+
+          String errorMessage = message;
+          if (errors.isNotEmpty) {
+            errorMessage += '\n' +
+                errors.entries.map((e) => '${e.key}: ${e.value}').join('\n');
+          }
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Registration failed. Please try again.')),
+            SnackBar(content: Text(errorMessage)),
           );
         }
       } catch (e) {
@@ -154,8 +179,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       fillColor: Colors.blue.shade50,
                     ),
                     obscureText: true,
-                    validator: (value) =>
-                        value!.length < 9 ? 'Password too short' : null,
+                    validator: (value) => value!.length < 6
+                        ? 'Password must be at least 6 characters'
+                        : null,
                     onSaved: (value) => _password = value!,
                   ),
                   SizedBox(height: 20),
@@ -223,7 +249,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'National ID',
-                      prefixIcon: Icon(Icons.credit_card),
+                      prefixIcon: Icon(Icons.perm_identity),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -250,13 +276,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       DropdownMenuItem(value: 0, child: Text('Male')),
                       DropdownMenuItem(value: 1, child: Text('Female')),
                     ],
-                    onChanged: (value) => setState(() => _gender = value!),
+                    onChanged: (value) {
+                      setState(() {
+                        _gender = value!;
+                      });
+                    },
                   ),
                   SizedBox(height: 20),
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Address Details',
-                      prefixIcon: Icon(Icons.home),
+                      prefixIcon: Icon(Icons.location_on),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -271,22 +301,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   SizedBox(height: 20),
                   TextFormField(
                     decoration: InputDecoration(
-                      labelText: 'Image Path',
-                      prefixIcon: Icon(Icons.image),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      filled: true,
-                      fillColor: Colors.blue.shade50,
-                    ),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter your image path' : null,
-                    onSaved: (value) => _imagePath = value!,
-                  ),
-                  SizedBox(height: 20),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'University Entity ID',
+                      labelText: 'UnEntity ID',
                       prefixIcon: Icon(Icons.school),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -294,16 +309,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       filled: true,
                       fillColor: Colors.blue.shade50,
                     ),
-                    validator: (value) => int.tryParse(value!) == null
-                        ? 'Please enter a valid number'
-                        : null,
+                    validator: (value) =>
+                        value!.isEmpty ? 'Please enter your UnEntity ID' : null,
                     onSaved: (value) => _unEntityId = int.parse(value!),
                   ),
                   SizedBox(height: 20),
                   TextFormField(
-                    controller: _addressController,
                     decoration: InputDecoration(
-                      labelText: 'Address ID',
+                      labelText: 'City ID',
                       prefixIcon: Icon(Icons.location_city),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -311,33 +324,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       filled: true,
                       fillColor: Colors.blue.shade50,
                     ),
-                    validator: (value) => int.tryParse(value!) == null
-                        ? 'Please enter a valid number'
-                        : null,
-                    onSaved: (value) =>
-                        _addressId = int.parse(value!) as String,
+                    validator: (value) =>
+                        value!.isEmpty ? 'Please enter your city ID' : null,
+                    onSaved: (value) => _cityId = int.parse(value!),
                   ),
                   SizedBox(height: 20),
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Level',
-                      prefixIcon: Icon(Icons.bar_chart),
+                      prefixIcon: Icon(Icons.grade),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       filled: true,
                       fillColor: Colors.blue.shade50,
                     ),
-                    validator: (value) => int.tryParse(value!) == null
-                        ? 'Please enter a valid number'
-                        : null,
+                    validator: (value) =>
+                        value!.isEmpty ? 'Please enter your level' : null,
                     onSaved: (value) => _level = int.parse(value!),
                   ),
                   SizedBox(height: 20),
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'College Department',
-                      prefixIcon: Icon(Icons.business),
+                      prefixIcon: Icon(Icons.book),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -349,20 +359,53 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         : null,
                     onSaved: (value) => _collegeDepartment = value!,
                   ),
-                  SizedBox(height: 40),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
+                  SizedBox(height: 20),
+                  DropdownButtonFormField<bool>(
+                    decoration: InputDecoration(
+                      labelText: 'Has Disability',
+                      prefixIcon: Icon(Icons.accessible),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                      textStyle: TextStyle(fontSize: 18),
+                      filled: true,
+                      fillColor: Colors.blue.shade50,
                     ),
-                    child: Text('Sign Up'),
+                    value: _hasDisability,
+                    items: [
+                      DropdownMenuItem(value: true, child: Text('Yes')),
+                      DropdownMenuItem(value: false, child: Text('No')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _hasDisability = value!;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Disability Type',
+                      prefixIcon: Icon(Icons.accessible_forward),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      filled: true,
+                      fillColor: Colors.blue.shade50,
+                    ),
+                    validator: (value) => value!.isEmpty
+                        ? 'Please enter your disability type'
+                        : null,
+                    onSaved: (value) => _disabilityType = int.parse(value!),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _pickImage,
+                    child: Text('Pick Image'),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
                     onPressed: _submit,
+                    child: Text('Submit'),
                   ),
                 ],
               ),

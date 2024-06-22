@@ -19,6 +19,8 @@ import 'package:hive/science.dart';
 // ignore: unused_import
 import 'package:hive/search.dart';
 // ignore: unused_import
+import 'package:hive/sign_in.dart';
+// ignore: unused_import
 import 'package:hive/sign_up.dart';
 import 'package:hive/sports.dart';
 import 'package:provider/provider.dart';
@@ -64,11 +66,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-      home: SportsPage(),
-      //Families(),
-      //  SignUpScreen(),
-
+      home:
+          //SportsPage(),
+          //Families(),
+          SignUpPage(),
       routes: {
         'sports': (context) => SportsPage(),
         'families': (context) => Families(),

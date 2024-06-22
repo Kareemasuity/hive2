@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hive/data.dart';
 import 'package:http/http.dart' as http;
 
 class ActivityPage extends StatefulWidget {
@@ -23,7 +24,7 @@ class _ActivityPageState extends State<ActivityPage> {
 
     try {
       final response =
-          await http.get(Uri.parse('$baseUrl/api/Activity/GetAllActivities'));
+          await http.get(Uri.parse('$url/api/Activity/GetAllActivities'));
 
       if (response.statusCode == 200) {
         print('fetched');

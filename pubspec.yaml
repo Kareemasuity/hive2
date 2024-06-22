@@ -48,6 +48,8 @@ dependencies:
   provider: ^6.1.2
   fluttertoast: ^8.2.5
   intl: ^0.17.0
+  carousel_slider: ^4.2.1
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -103,6 +105,9 @@ flutter:
      - images/Tokyo.png
      - images/sports.jpg
      - images/basket.jpg
+     - images/drop.png
+     - images/apple.png
+
      
      
      
