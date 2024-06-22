@@ -4,11 +4,17 @@ import 'package:flutter/material.dart';
 // ignore: unused_import
 import 'package:hive/activites.dart';
 // ignore: unused_import
+import 'package:hive/home_page.dart';
+// ignore: unused_import
 import 'package:hive/image_slider.dart';
 // ignore: unused_import
 import 'package:hive/login.dart';
 // ignore: unused_import
+// ignore: unused_import
 import 'package:hive/search.dart';
+// ignore: unused_import
+import 'package:hive/sign_in.dart';
+// ignore: unused_import
 import 'package:hive/sign_up.dart';
 
 // ignore: unused_import
@@ -43,7 +49,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SignUpScreen(),
+      home: SignUpPage(),
     );
   }
 }
