@@ -117,8 +117,8 @@ class SignScreen extends StatelessWidget {
                       icon: const Icon(Icons.login),
                       label: const Text('Log in with Google'),
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.white,
-                        onPrimary: Colors.black,
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           side: BorderSide(color: Colors.grey.shade300),

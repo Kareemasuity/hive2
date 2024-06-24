@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:another_carousel_pro/another_carousel_pro.dart';
 import 'package:hive/Nav_bar.dart';
+import 'package:hive/art.dart';
 // ignore: unused_import
 import 'package:hive/categories_sub_categories_screen/categories_sub_categories_screen.dart';
+import 'package:hive/culture.dart';
+import 'package:hive/families.dart';
+import 'package:hive/other_activities.dart';
+import 'package:hive/rovers.dart';
+import 'package:hive/science.dart';
 import 'package:hive/sports.dart';
 import 'package:hive/trips_page.dart';
 
@@ -14,14 +20,23 @@ class ImageSliders extends StatefulWidget {
 }
 
 class _ImageSlidersState extends State<ImageSliders> {
+  final Map<String, Widget> routeWidgets = {
+    'sports': SportsPage(),
+    'culture': CulturePage(),
+    'science': SciencePage(),
+    'families': Families(),
+    'art': ArtsPage(),
+    'rovers': RoversPage(),
+    'otherActivities': OtherActivities(),
+  };
   final List<Map<String, String>> categories = [
-    {"name": "Sports"},
-    {"name": "Culture"},
-    {"name": "science"},
-    {"name": "families"},
-    {"name": "Art"},
-    {"name": "Rovers"},
-    {"name": "other actvites"},
+    {"name": "Sports", "screen": "sports"},
+    {"name": "Culture", "screen": "culture"},
+    {"name": "Science", "screen": "science"},
+    {"name": "Families", "screen": "families"},
+    {"name": "Art", "screen": "art"},
+    {"name": "Rovers", "screen": "rovers"},
+    {"name": "Other Activities", "screen": "otherActivities"},
   ];
 
   @override
@@ -68,7 +83,10 @@ class _ImageSlidersState extends State<ImageSliders> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
-                    // Handle category tap
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) =>
+                            routeWidgets[categories[index]["screen"]] ??
+                            Container()));
                   },
                   child: Container(
                     margin: EdgeInsets.symmetric(horizontal: 8),

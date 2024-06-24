@@ -88,7 +88,7 @@ class TripCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Image.asset(
-          trip['images/Trip-bro.png'],
+          trip["images/Trip-bro.png"],
           fit: BoxFit.cover,
         ),
       ),
