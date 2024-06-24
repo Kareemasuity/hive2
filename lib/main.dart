@@ -19,7 +19,7 @@ import 'package:hive/science.dart';
 // ignore: unused_import
 import 'package:hive/search.dart';
 // ignore: unused_import
-import 'package:hive/sign_in.dart';
+
 // ignore: unused_import
 import 'package:hive/sign_up.dart';
 import 'package:hive/sports.dart';
@@ -66,12 +66,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-<<<<<<< HEAD
-      home: LoginScreen(),
-=======
       home:
           //SportsPage(),
-          Families(),
+          LoginScreen(),
       //SignUpPage(),
       routes: {
         'sports': (context) => SportsPage(),
@@ -82,7 +79,6 @@ class MyApp extends StatelessWidget {
         'rovers': (context) => RoversPage(),
         'otherActivities': (context) => OtherActivities(),
       },
->>>>>>> 63b2cdb94660bdaa5309169193690eb06980efee
     );
   }
 }

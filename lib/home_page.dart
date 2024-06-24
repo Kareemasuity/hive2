@@ -113,8 +113,8 @@ class CommitteesGrid extends StatelessWidget {
   final List<Map<String, String>> committees = [
     {'title': 'Artistry', 'icon': 'images/Trip-bro.png'},
     {'title': 'Cultural', 'icon': 'images/Trip-bro.png'},
-    {'title': 'Families', 'icon': 'images/Trip-bro.png'},
-    {'title': 'Sports', 'icon': 'images/Trip-bro.png'},
+    {'title': 'families', 'icon': 'images/Trip-bro.png'},
+    {'title': 'sports', 'icon': 'images/Trip-bro.png'},
     {'title': 'Social', 'icon': 'images/Trip-bro.png'},
     {'title': 'Science', 'icon': 'images/Trip-bro.png'},
   ];
