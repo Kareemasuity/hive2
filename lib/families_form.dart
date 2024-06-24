@@ -1,16 +1,22 @@
 // ignore_for_file: unnecessary_import, unused_import
 
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/provider/familySupervisors_list_provider.dart';
 import 'package:hive/provider/familyplan_list_provider.dart';
 import 'package:hive/provider/member_list_provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:hive/family_data.dart';
 import 'package:intl/intl.dart';
+
+typedef FileSetter = void Function(File file);
 
 class FamiliesForm extends StatefulWidget {
   const FamiliesForm({super.key});
@@ -28,6 +34,11 @@ class _FamiliesFormState extends State<FamiliesForm> {
   gender _leaderGender = gender.Male;
   gender _viceleaderGender = gender.Male;
   var familyDTo;
+
+  late File _imageFile;
+  late File deanApprovalFile;
+  late File headApprovalFile;
+  late File viceHeadApprovalFile;
   bool get isFirstStep => currentStep == 0;
   bool get isLastStep => currentStep == steps().length - 1;
   DateTime PlanStartDate = DateTime.now();
@@ -121,6 +132,41 @@ class _FamiliesFormState extends State<FamiliesForm> {
         });
       }
     });
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedFile != null) {
+        _imageFile = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
+  Future<void> _pickFile(FileSetter setter) async {
+    final result = await FilePicker.platform.pickFiles();
+    setState(() {
+      if (result != null && result.files.single.path != null) {
+        setter(File(result.files.single.path!));
+      } else {
+        print('No file selected.');
+      }
+    });
+  }
+
+  void setDeanApprovalFile(File file) {
+    deanApprovalFile = file;
+  }
+
+  void setHeadApprovalFile(File file) {
+    headApprovalFile = file;
+  }
+
+  void setViceHeadApprovalFile(File file) {
+    viceHeadApprovalFile = file;
   }
 
   void _showFamilyInfoDialog() {
@@ -364,6 +410,23 @@ class _FamiliesFormState extends State<FamiliesForm> {
                 decoration: InputDecoration(labelText: 'Vision'),
                 keyboardType: TextInputType.multiline,
               ),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: Text('Pick Image'),
+              ),
+              ElevatedButton(
+                onPressed: () => _pickFile(setDeanApprovalFile),
+                child: Text('Pick Dean Approval'),
+              ),
+              ElevatedButton(
+                onPressed: () => _pickFile(setHeadApprovalFile),
+                child: Text('Pick Head Approval'),
+              ),
+              ElevatedButton(
+                onPressed: () => _pickFile(setViceHeadApprovalFile),
+                child: Text('Pick Vice Head Approval'),
+              ),
+              // to upload file 3
               TextButton(
                   onPressed: () {
                     setState(() {
@@ -371,8 +434,10 @@ class _FamiliesFormState extends State<FamiliesForm> {
                           familyMission: FMission.text,
                           familyVision: FVision.text,
                           name: FamilyName.text,
-                          imagePath: "joy",
-                          filePath: "joyyy",
+                          imagePath: _imageFile,
+                          deanApproval: deanApprovalFile,
+                          headApproval: headApprovalFile,
+                          viceHeadApproval: viceHeadApprovalFile,
                           familyRulesId: 0,
                           status: Status.Accepted);
                     });

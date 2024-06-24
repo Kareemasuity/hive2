@@ -23,12 +23,12 @@ class _FamiliesState extends State<Families> {
               ),
               Row(
                 children: [
-                  SizedBox(
-                      width: 200,
-                      child: Image(
-                        image: AssetImage('images/families_img.jpeg'),
-                        fit: BoxFit.fill,
-                      )),
+                  // SizedBox(
+                  //     width: 200,
+                  //     child: Image(
+                  //       image: AssetImage('images/families_img.jpeg'),
+                  //       fit: BoxFit.fill,
+                  //     )),
                   Text("mmmmmmmmmmm")
                 ],
               ),

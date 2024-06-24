@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:hive/provider/member_list_provider.dart';
 import 'package:intl/intl.dart';
@@ -52,16 +53,6 @@ extension SuperVisorRoleExtension on SuperVisorRole {
     return this.index;
   }
 }
-// extension StatusExtension on Status {
-//   String toShortString() {
-//     return this.toString().split('.').last;
-//   }
-
-//   static Status fromString(String statusString) {
-//     return Status.values
-//         .firstWhere((status) => status.toShortString() == statusString);
-//   }
-// }
 
 class AddingFamilyDto {
   CreateAndUpdateFamilyDto familyDto;
@@ -94,8 +85,10 @@ class CreateAndUpdateFamilyDto {
   String name;
   String familyMission;
   String familyVision;
-  String? imagePath;
-  String? filePath;
+  File? imagePath;
+  File? deanApproval;
+  File? headApproval;
+  File? viceHeadApproval;
   Status status;
   int familyRulesId;
 
@@ -104,7 +97,9 @@ class CreateAndUpdateFamilyDto {
     required this.familyMission,
     required this.familyVision,
     this.imagePath,
-    this.filePath,
+    this.deanApproval,
+    this.headApproval,
+    this.viceHeadApproval,
     required this.status,
     required this.familyRulesId,
   });
@@ -114,13 +109,20 @@ class CreateAndUpdateFamilyDto {
       'name': name,
       'familyMission': familyMission,
       'familyVision': familyVision,
-      'imagePath': imagePath,
-      'filePath': filePath,
+      'imagePath': _fileToBase64(imagePath),
+      'deanApproval': _fileToBase64(deanApproval),
+      'headApproval': _fileToBase64(headApproval),
+      'viceHeadApproval': _fileToBase64(viceHeadApproval),
       'status': status.toIndex(),
       'familyRulesId': familyRulesId,
     };
     print('CreateAndUpdateFamilyPlanDto JSON Payload: $json');
     return json;
+  }
+
+  String? _fileToBase64(File? file) {
+    if (file == null) return null;
+    return base64Encode(file.readAsBytesSync());
   }
 }
 

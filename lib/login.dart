@@ -153,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Text('Login'),
                   onPressed: () {
-                    _login;
+                    _login();
                   },
                 ),
                 SizedBox(height: 20),

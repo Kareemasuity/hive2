@@ -1,7 +1,23 @@
 import 'package:flutter/material.dart';
 
-class SignScreen extends StatelessWidget {
+class SignScreen extends StatefulWidget {
   const SignScreen({super.key});
+
+  @override
+  State<SignScreen> createState() => _SignScreenState();
+}
+
+class _SignScreenState extends State<SignScreen> {
+  TextEditingController userName = TextEditingController();
+  GlobalKey<FormState> _SignInFormKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    userName = TextEditingController();
+    _SignInFormKey = GlobalKey<FormState>();
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

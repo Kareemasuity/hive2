@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // ignore: unused_import
 import 'package:flutter/animation.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
+// import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
@@ -138,20 +138,20 @@ class _SignUpPageState extends State<SignUpPage> {
                 children: <Widget>[
                   FlutterLogo(size: 100),
                   SizedBox(height: 40),
-                  AnimatedTextKit(
-                    animatedTexts: [
-                      TypewriterAnimatedText(
-                        'Create Account',
-                        textStyle: TextStyle(
-                          fontSize: 32.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        speed: Duration(milliseconds: 200),
-                      ),
-                    ],
-                    totalRepeatCount: 1,
-                  ),
+                  // AnimatedTextKit(
+                  //   animatedTexts: [
+                  //     TypewriterAnimatedText(
+                  //       'Create Account',
+                  //       textStyle: TextStyle(
+                  //         fontSize: 32.0,
+                  //         fontWeight: FontWeight.bold,
+                  //         color: Colors.white,
+                  //       ),
+                  //       speed: Duration(milliseconds: 200),
+                  //     ),
+                  //   ],
+                  //   totalRepeatCount: 1,
+                  // ),
                   SizedBox(height: 40),
                   TextFormField(
                     decoration: InputDecoration(

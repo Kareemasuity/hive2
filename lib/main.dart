@@ -68,8 +68,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home:
           //SportsPage(),
-          //Families(),
-          SignUpPage(),
+          Families(),
+      //SignUpPage(),
       routes: {
         'sports': (context) => SportsPage(),
         'families': (context) => Families(),
