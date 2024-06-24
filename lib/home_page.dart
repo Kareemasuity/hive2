@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/data.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -176,7 +177,23 @@ class _LatestNewsListState extends State<LatestNewsList> {
   }
 
   Future<void> fetchLatestNews() async {
-    final response = await http.get(Uri.parse('$url/api/News/GetAllNews'));
+    final storage = FlutterSecureStorage();
+    String? token = await storage.read(key: 'access_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('User is not authenticated');
+    }
+
+    final headers = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+
+    final response = await http.get(
+      Uri.parse('$url/api/News/GetAllNews'),
+      headers: headers,
+    );
+
     if (response.statusCode == 200) {
       print('fetched');
       final List<dynamic> newsData = json.decode(response.body);
@@ -283,8 +300,23 @@ class _CurrentEventSliderState extends State<CurrentEventSlider> {
   }
 
   Future<void> fetchCurrentEvents() async {
-    final response =
-        await http.get(Uri.parse('$url/api/CurrentEvent/GetAllCurrentEvent'));
+    final storage = FlutterSecureStorage();
+    String? token = await storage.read(key: 'access_token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('User is not authenticated');
+    }
+
+    final headers = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+
+    final response = await http.get(
+      Uri.parse('$url/api/CurrentEvent/GetAllCurrentEvent'),
+      headers: headers,
+    );
+
     if (response.statusCode == 200) {
       print('fetched');
       final List<dynamic> eventsData = json.decode(response.body);

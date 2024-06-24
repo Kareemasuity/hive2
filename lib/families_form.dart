@@ -186,13 +186,12 @@ class _FamiliesFormState extends State<FamiliesForm> {
                 Text("Leader ID: ${leaderID.text}"),
                 Text("Leader Phone: ${leaderPhone.text}"),
                 Text("Leader Address: ${leaderAddress.text}"),
-                Text("Leader Gender: ${_leaderGender ?? 'Not specified'}"),
+                Text("Leader Gender: ${_leaderGender}"),
                 Text("Vice Leader Name: ${VleaderName.text}"),
                 Text("Vice Leader ID: ${VleaderID.text}"),
                 Text("Vice Leader Phone: ${VleaderPhone.text}"),
                 Text("Vice Leader Address: ${VleaderAddress.text}"),
-                Text(
-                    "Vice Leader Gender: ${_viceleaderGender ?? 'Not specified'}"),
+                Text("Vice Leader Gender: ${_viceleaderGender}"),
                 Text(
                     "Vice Family Rapporteur Name: ${DeputyFamilyRapporteur.text}"),
                 Text(
