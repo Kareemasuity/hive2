@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-import 'package:hive/image_slider.dart';
-
-import 'package:hive/sign_up.dart';
+import 'package:hive/data.dart';
 import 'package:http/http.dart' as http;
+import 'package:hive/home_page.dart';
+import 'package:hive/sign_up.dart';
 
 void main() {
   runApp(LoginApp());
@@ -41,44 +39,59 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       try {
-        final response = await http.post(
-          Uri.parse('https://localhost:7147/api/Authorization/Login'),
-          body: jsonEncode({'email': _email, 'password': _password}),
-          headers: {'Content-Type': 'application/json'},
-        );
+        final uri = Uri.parse('$url/api/Authorization/Login');
+        final headers = {'Content-Type': 'application/json'};
+        final body = jsonEncode({'email': _email, 'password': _password});
+
+        print('Sending POST request to $uri');
+        print('Headers: $headers');
+        print('Body: $body');
+
+        final response = await http.post(uri, headers: headers, body: body);
+
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
 
         if (response.statusCode == 200) {
           final responseData = jsonDecode(response.body);
-          if (responseData['success']) {
+          print('Response data: $responseData');
+
+          if (responseData['isAuthenticated'] == true &&
+              responseData.containsKey('token') &&
+              responseData.containsKey('refreshToken')) {
             // Login successful, store tokens
-            final accessToken = responseData['accessToken'];
+            final accessToken = responseData['token'];
             final refreshToken = responseData['refreshToken'];
 
-            // Store tokens securely (you can use flutter_secure_storage package)
+            // Store tokens securely
             final storage = FlutterSecureStorage();
             await storage.write(key: 'access_token', value: accessToken);
             await storage.write(key: 'refresh_token', value: refreshToken);
 
-            // Navigate to home screen or any other screen
+            // Navigate to home screen
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => ImageSliders()),
+              MaterialPageRoute(builder: (context) => HomePage()),
             );
           } else {
             // Login failed, show error message
+            print('Login failed, server did not return tokens.');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Login failed. Please try again.')),
             );
           }
         } else {
-          // If the server did not return a 200 OK response,
-          // throw an exception.
-          throw Exception('Failed to login');
+          // If the server did not return a 200 OK response, throw an exception
+          print('Failed to login: ${response.reasonPhrase}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to login: ${response.reasonPhrase}'),
+            ),
+          );
         }
       } catch (e) {
         // Handle error
         print('Error during login: $e');
-        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error during login. Please try again later.'),
@@ -153,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Text('Login'),
                   onPressed: () {
-                    _login;
+                    _login();
                   },
                 ),
                 SizedBox(height: 20),
