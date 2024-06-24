@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'dart:ffi';
 
 import 'package:hive/provider/member_list_provider.dart';
