@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/data.dart';
+import 'package:hive/token_manage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -182,6 +183,15 @@ class _LatestNewsListState extends State<LatestNewsList> {
 
     if (token == null || token.isEmpty) {
       throw Exception('User is not authenticated');
+    }
+
+    if (await isTokenExpired(token)) {
+      try {
+        await refreshToken();
+        token = await storage.read(key: 'access_token');
+      } catch (e) {
+        throw Exception('Failed to refresh token');
+      }
     }
 
     final headers = {
