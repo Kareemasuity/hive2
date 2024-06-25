@@ -1,9 +1,11 @@
+// ignore_for_file: unused_import
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 // ignore: unnecessary_import
 import 'package:flutter/services.dart';
-// ignore: unused_import
+
 import 'package:flutter/animation.dart';
 // import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:http/http.dart' as http;
