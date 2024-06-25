@@ -1,7 +1,18 @@
+// import 'dart:js';
+
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/art.dart';
+import 'package:hive/committees_data.dart';
+import 'package:hive/culture.dart';
 import 'package:hive/data.dart';
+import 'package:hive/families.dart';
+import 'package:hive/families_form.dart';
+import 'package:hive/other_activities.dart';
+import 'package:hive/rovers.dart';
+import 'package:hive/science.dart';
+import 'package:hive/sports.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -64,7 +75,26 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 16),
-                CommitteesGrid(),
+                CommitteesWidget(),
+                SizedBox(height: 16),
+                Text(
+                  'Families',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Families(),
+                        ),
+                      );
+                    },
+                    child: Text("Start your family")),
                 SizedBox(height: 16),
                 Text(
                   'Latest News',
@@ -110,57 +140,121 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class CommitteesGrid extends StatelessWidget {
-  final List<Map<String, String>> committees = [
-    {'title': 'Artistry', 'icon': 'images/Trip-bro.png'},
-    {'title': 'Cultural', 'icon': 'images/Trip-bro.png'},
-    {'title': 'families', 'icon': 'images/Trip-bro.png'},
-    {'title': 'sports', 'icon': 'images/Trip-bro.png'},
-    {'title': 'Social', 'icon': 'images/Trip-bro.png'},
-    {'title': 'Science', 'icon': 'images/Trip-bro.png'},
-  ];
+FamiliesWidget() {
+  return SizedBox(
+    height: 40,
+    child: Row(
+      children: [],
+    ),
+  );
+}
+
+Future<List<Committee>> fetchCommittees() async {
+  final storage = FlutterSecureStorage();
+  String? token = await storage.read(key: 'access_token');
+
+  if (token == null || token.isEmpty) {
+    throw Exception('User is not authenticated');
+  }
+
+  final headers = {
+    'Authorization': 'Bearer $token',
+    'Content-Type': 'application/json',
+  };
+
+  final response = await http.get(
+    Uri.parse('$url/api/Committee/GetAllCommittees'),
+    headers: headers,
+  );
+
+  if (response.statusCode == 200) {
+    List jsonResponse = json.decode(response.body);
+    return jsonResponse
+        .map((committee) => Committee.fromJson(committee))
+        .toList();
+  } else {
+    throw Exception('Failed to load committees');
+  }
+}
+
+class CommitteesWidget extends StatefulWidget {
+  @override
+  _CommitteesWidgetState createState() => _CommitteesWidgetState();
+}
+
+class _CommitteesWidgetState extends State<CommitteesWidget> {
+  late Future<List<Committee>> futureCommittees;
+
+  @override
+  void initState() {
+    super.initState();
+    futureCommittees = fetchCommittees();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 80, // Adjust the height as needed
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: committees.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      CommitteeDetailPage(title: committees[index]['title']!),
-                ),
-              );
-            },
-            child: Container(
-              width: 80, // Adjust the width as needed
-              margin: EdgeInsets.only(right: 16),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Image.asset(
-                      committees[index]['icon']!,
-                      fit: BoxFit.cover,
+    return FutureBuilder<List<Committee>>(
+      future: futureCommittees,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No data available'));
+        } else {
+          List<Committee> committees = snapshot.data!;
+          return Container(
+            height: 80, // Adjust the height as needed
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: committees.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          routeWidgets[
+                              committees[index].englishName.toLowerCase()] ??
+                          Container(),
+                    ));
+                  },
+                  child: Container(
+                    width: 80, // Adjust the width as needed
+                    margin: EdgeInsets.only(right: 16),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Image.asset(
+                            'images/Trip-bro.png', // Replace with the correct path
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(committees[index].englishName,
+                            style: TextStyle(fontSize: 12)),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(committees[index]['title']!,
-                      style: TextStyle(fontSize: 12)),
-                ],
-              ),
+                );
+              },
             ),
           );
-        },
-      ),
+        }
+      },
     );
   }
 }
+
+final Map<String, Widget> routeWidgets = {
+  'sports': SportsPage(),
+  'culture': CulturePage(),
+  'science': SciencePage(),
+  'families': Families(),
+  'art': ArtsPage(),
+  'rovers': RoversPage(),
+  'otherActivities': OtherActivities(),
+};
 
 class LatestNewsList extends StatefulWidget {
   @override
