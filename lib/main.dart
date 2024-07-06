@@ -59,12 +59,15 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  Color _mainColor = const Color.fromARGB(255, 1, 52, 130);
+
+  MyApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(primaryColor: _mainColor),
       debugShowCheckedModeBanner: false,
       home:
           //SportsPage(),

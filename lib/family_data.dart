@@ -15,6 +15,10 @@ extension StatusExtension on Status {
   int toIndex() {
     return this.index;
   }
+
+  static Status fromIndex(int index) {
+    return Status.values[index];
+  }
 }
 
 enum gender { Male, Female }
@@ -46,6 +50,10 @@ extension RoleExtension on Role {
   int toIndex() {
     return this.index;
   }
+
+  static Role fromIndex(int index) {
+    return Role.values[index];
+  }
 }
 
 enum SuperVisorRole { leader, ViceLeader }
@@ -53,6 +61,10 @@ enum SuperVisorRole { leader, ViceLeader }
 extension SuperVisorRoleExtension on SuperVisorRole {
   int toIndex() {
     return this.index;
+  }
+
+  static SuperVisorRole fromIndex(int index) {
+    return SuperVisorRole.values[index];
   }
 }
 
@@ -68,6 +80,24 @@ class AddingFamilyDto {
     required this.familyPlanDtos,
     required this.familySupervisorsDtos,
   });
+
+  factory AddingFamilyDto.fromJson(Map<String, dynamic> json) {
+    return AddingFamilyDto(
+      familyDto: CreateAndUpdateFamilyDto.fromJson(json['familyDto']),
+      familyEnrollmentDtos: (json['familyEnrollmentDtos'] as List<dynamic>)
+          .map((e) =>
+              FamilyEnrollmentEndPointDto.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      familyPlanDtos: (json['familyPlanDtos'] as List<dynamic>)
+          .map((e) =>
+              CreateAndUpdateFamilyPlanDto.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      familySupervisorsDtos: (json['familySupervisorsDtos'] as List<dynamic>)
+          .map((e) => CreateAndUpdateFamilySupervisorsDto.fromJson(
+              e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 
   Map<String, dynamic> toJson() {
     final json = {
@@ -106,6 +136,20 @@ class CreateAndUpdateFamilyDto {
     required this.familyRulesId,
   });
 
+  factory CreateAndUpdateFamilyDto.fromJson(Map<String, dynamic> json) {
+    return CreateAndUpdateFamilyDto(
+      name: json['name'],
+      familyMission: json['familyMission'],
+      familyVision: json['familyVision'],
+      imagePath: json['imagePath'],
+      deanApproval: json['deanApproval'],
+      headApproval: json['headApproval'],
+      viceHeadApproval: json['viceHeadApproval'],
+      status: StatusExtension.fromIndex(json['status']),
+      familyRulesId: json['familyRulesId'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     final json = {
       'name': name,
@@ -138,7 +182,13 @@ class FamilyEnrollmentEndPointDto {
     required this.familyId,
     this.userName,
   });
-
+  factory FamilyEnrollmentEndPointDto.fromJson(Map<String, dynamic> json) {
+    return FamilyEnrollmentEndPointDto(
+      role: RoleExtension.fromIndex(json['role']),
+      familyId: json['familyId'],
+      userName: json['userName'],
+    );
+  }
   Map<String, dynamic> toJson() {
     final json = {
       'role': role.toIndex(),
@@ -164,6 +214,16 @@ class CreateAndUpdateFamilyPlanDto {
     required this.startDate,
     required this.endDate,
   });
+
+  factory CreateAndUpdateFamilyPlanDto.fromJson(Map<String, dynamic> json) {
+    return CreateAndUpdateFamilyPlanDto(
+      familyId: json['familyId'],
+      eventName: json['eventName'],
+      placeOfImplementation: json['placeOfImplementation'],
+      startDate: DateTime.parse(json['startDate']),
+      endDate: DateTime.parse(json['endDate']),
+    );
+  }
 
   Map<String, dynamic> toJson() {
     final json = {
@@ -199,7 +259,17 @@ class CreateAndUpdateFamilySupervisorsDto {
     required this.phoneNumber,
     required this.role,
   });
-
+  factory CreateAndUpdateFamilySupervisorsDto.fromJson(
+      Map<String, dynamic> json) {
+    return CreateAndUpdateFamilySupervisorsDto(
+      name: json['name'],
+      Gender: genderExtension.fromIndex(json['gender']),
+      nationalId: json['nationalId'],
+      address: json['address'],
+      phoneNumber: json['phoneNumber'],
+      role: SuperVisorRoleExtension.fromIndex(json['role']),
+    );
+  }
   Map<String, dynamic> toJson() {
     final json = {
       'name': name,
@@ -213,86 +283,6 @@ class CreateAndUpdateFamilySupervisorsDto {
     return json;
   }
 }
-
-// class Family {
-//   List<Member> members;
-//   String familyName;
-//   String mission;
-//   String vision;
-//   String? imagePath;
-//   String? filePath;
-//   int familyRulesId;
-//   int status;
-//   List<CreateAndUpdateFamilyPlanDto> familyPlans;
-//   List<FamilySupervisor> familySupervisors;
-
-//   Family({
-//     required this.familyName,
-//     required this.mission,
-//     required this.vision,
-//     this.imagePath,
-//     this.filePath,
-//     required this.status,
-//     required this.familyRulesId,
-//     required this.members,
-//     required this.familyPlans,
-//     required this.familySupervisors,
-//   });
-
-//   Map<String, dynamic> toJson() => {
-//         'name': familyName,
-//         'familyMission': mission,
-//         'familyVision': vision,
-//         'imagePath': imagePath,
-//         'filePath': filePath,
-//         'status': status,
-//         'familyRulesId': familyRulesId,
-//         'familyEnrollmentDtos': members.map((e) => e.toJson()).toList(),
-//         'familyPlanDtos': familyPlans.map((e) => e.toJson()).toList(),
-//         'familySupervisorsDtos':
-//             familySupervisors.map((e) => e.toJson()).toList(),
-//       };
-// }
-
-class Member {
-  String role;
-  String userName;
-
-  Member({
-    required this.role,
-    required this.userName,
-  });
-
-  Map<String, dynamic> toJson() {
-    final json = {
-      'role': role,
-      'userName': userName,
-    };
-    print("Adding Supervisors : $json");
-    return json;
-  }
-}
-
-// class FamilyPlan {
-//   String eventName;
-//   String placeOfImplementation;
-//   String startDate;
-//   String endDate;
-
-//   FamilyPlan({
-//     required this.eventName,
-//     required this.placeOfImplementation,
-//     required this.startDate,
-//     required this.endDate,
-//   });
-
-//   Map<String, dynamic> toJson() => {
-//         'eventName': eventName,
-//         'placeOfImplementation': placeOfImplementation,
-//         'startDate': startDate,
-//         'endDate': endDate,
-//       };
-// }
 
 class FamilySupervisor {
   String name;

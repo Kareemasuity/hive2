@@ -94,7 +94,7 @@ class HomePage extends StatelessWidget {
                         ),
                       );
                     },
-                    child: Text("Start your family")),
+                    child: Text("Check Families Committee")),
                 SizedBox(height: 16),
                 Text(
                   'Latest News',
@@ -138,15 +138,6 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-}
-
-FamiliesWidget() {
-  return SizedBox(
-    height: 40,
-    child: Row(
-      children: [],
-    ),
-  );
 }
 
 Future<List<Committee>> fetchCommittees() async {
