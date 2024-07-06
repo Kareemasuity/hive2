@@ -7,12 +7,16 @@ import 'package:hive/art.dart';
 import 'package:hive/committees_data.dart';
 import 'package:hive/culture.dart';
 import 'package:hive/data.dart';
+<<<<<<< HEAD
+import 'package:hive/token_manage.dart';
+=======
 import 'package:hive/families.dart';
 import 'package:hive/families_form.dart';
 import 'package:hive/other_activities.dart';
 import 'package:hive/rovers.dart';
 import 'package:hive/science.dart';
 import 'package:hive/sports.dart';
+>>>>>>> 4c2cee5414e3b09b94f766dda0e75f1ee7bb5968
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -267,6 +271,15 @@ class _LatestNewsListState extends State<LatestNewsList> {
 
     if (token == null || token.isEmpty) {
       throw Exception('User is not authenticated');
+    }
+
+    if (await isTokenExpired(token)) {
+      try {
+        await refreshToken();
+        token = await storage.read(key: 'access_token');
+      } catch (e) {
+        throw Exception('Failed to refresh token');
+      }
     }
 
     final headers = {
