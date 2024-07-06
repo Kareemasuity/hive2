@@ -7,7 +7,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/data.dart';
 import 'package:hive/families_form.dart';
 import 'package:hive/family_data.dart';
-import 'package:hive/token_manage.dart';
+import 'package:hive/myFamily_response_data.dart';
+import 'package:hive/widgets/accepted_family_widget.dart';
+import 'package:hive/widgets/pending_family_widget.dart';
+import 'package:hive/widgets/rejected_family_widget.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
@@ -20,9 +23,10 @@ class Families extends StatefulWidget {
 }
 
 class _FamiliesState extends State<Families> {
-  late List<AddingFamilyDto> families;
+  late FamilyResponseDto family;
   late Status familyStatus;
   final storage = new FlutterSecureStorage();
+
   Future<String?> _getToken() async {
     return await storage.read(key: 'access_token');
   }
@@ -31,8 +35,11 @@ class _FamiliesState extends State<Families> {
     return JwtDecoder.isExpired(token);
   }
 
+  Future<void> refreshToken() async {
+    // Implement your token refresh logic here
+  }
+
   Future<bool> _isUserEnrolled() async {
-    bool? isEnrolled;
     String? token = await _getToken();
     if (token == null) {
       return false;
@@ -44,9 +51,8 @@ class _FamiliesState extends State<Families> {
     }
 
     Map<String, dynamic> payload = JwtDecoder.decode(token!);
-    String userId =
-        payload['uid']; // Replace 'sub' with the correct key if different
-    //located at services folder / TokenService / CreateJwtToken function
+    String userId = payload['uid'];
+
     final response = await http.get(
       Uri.parse('$url/api/FamilyEndPoint/myFamilies/$userId'),
       headers: {
@@ -57,18 +63,17 @@ class _FamiliesState extends State<Families> {
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
       if (data != null && data.isNotEmpty) {
-        // Assuming 'status' is a field in the returned data
-        List<dynamic> familiesJson = data as List<dynamic>;
-        List<AddingFamilyDto> families = familiesJson
-            .map((json) =>
-                AddingFamilyDto.fromJson(json as Map<String, dynamic>))
-            .toList();
-        print(families);
-        // Assuming you want to check the status of the first family in the list
+        // Assuming the API returns a list of families, and we are interested in the first family
+        var firstFamilyJson = data[0] as Map<String, dynamic>;
+        var familyResponse = FamilyResponseDto.fromJson(firstFamilyJson);
+        // Since FamilyDto handles file initialization internally, we don't need to call it separately here
 
-        return isEnrolled! == true;
-      } else
-        return isEnrolled! == false;
+        family = familyResponse;
+
+        return true;
+      } else {
+        return false;
+      }
     }
     return false;
   }
@@ -83,27 +88,36 @@ class _FamiliesState extends State<Families> {
         elevation: 0,
         foregroundColor: Colors.black,
       ),
-      body:
-          //here i want to add if condition that checks if the user is enrolled in a family or not
-          FutureBuilder<bool>(
+      body: FutureBuilder<bool>(
         future: _isUserEnrolled(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
+            print(
+                "-----------------------------------------------myFamily function has error");
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (snapshot.hasData && snapshot.data == true) {
-            if (families.isNotEmpty) {
-              AddingFamilyDto firstFamily = families.first;
-              // Assuming the status you want to check is within the familyDto
-              familyStatus = firstFamily.familyDto.status;
-              _checkOnFamilyStatus(familyStatus);
-            }
+            print(
+                "-----------------------------------------------myFamily function called");
+            familyStatus =
+                family.familyDto.status; // Ensure familyStatus is correctly set
+            print(
+                "---------------------------------------------------$familyStatus");
+            // Call fetchFamilyDetails after the UI build phase is complete
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              fetchFamilyDetails(
+                  familyStatus, family.familyDto.familyId, context);
+            });
 
-            return EnrolledPendingFamiliesWidget();
+            // Alternatively, call a method that returns a widget
+            // _navigateToFamilyPage(context, familyStatus, family);
+
+            // Returning an empty container while navigating
+            return Container();
           } else {
-            // The user is not enrolled in any family
-            return NoFamiliesWidget();
+            // Calling a method that returns a widget
+            return _buildNoFamiliesWidget();
           }
         },
       ),
@@ -127,60 +141,21 @@ class _FamiliesState extends State<Families> {
   }
 }
 
-Widget _checkOnFamilyStatus(Status familyStatus) {
-  if (familyStatus == 0)
-    return EnrolledAcceptedFamiliesWidget();
-  else if (familyStatus == 1) {
-    return EnrolledRejectedFamiliesWidget();
-  } else
-    return EnrolledPendingFamiliesWidget();
-}
-
-class EnrolledPendingFamiliesWidget extends StatefulWidget {
-  const EnrolledPendingFamiliesWidget({super.key});
-
-  @override
-  State<EnrolledPendingFamiliesWidget> createState() =>
-      _EnrolledPendingFamilyState();
-}
-
-class _EnrolledPendingFamilyState extends State<EnrolledPendingFamiliesWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text(" Pending "));
+Widget _buildFamilyPage(int familyId, Status familyStatus) {
+  switch (familyStatus) {
+    case Status.Accepted:
+      return EnrolledAcceptedFamiliesWidget(familyId: familyId);
+    case Status.Rejected:
+      return EnrolledRejectedFamiliesWidget(familyId: familyId);
+    case Status.Pending:
+      return EnrolledPendingFamiliesWidget(familyId: familyId);
+    default:
+      return Container(); // Handle any other status or fallback
   }
 }
 
-class EnrolledAcceptedFamiliesWidget extends StatefulWidget {
-  const EnrolledAcceptedFamiliesWidget({super.key});
-
-  @override
-  State<EnrolledPendingFamiliesWidget> createState() =>
-      _EnrolledPendingFamilyState();
-}
-
-class _EnrolledAcceptedFamilyState
-    extends State<EnrolledPendingFamiliesWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text(" Accepted "));
-  }
-}
-
-class EnrolledRejectedFamiliesWidget extends StatefulWidget {
-  const EnrolledRejectedFamiliesWidget({super.key});
-
-  @override
-  State<EnrolledPendingFamiliesWidget> createState() =>
-      _EnrolledPendingFamilyState();
-}
-
-class _EnrolledRejectedFamilyState
-    extends State<EnrolledRejectedFamiliesWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text(" RejectedS "));
-  }
+Widget _buildNoFamiliesWidget() {
+  return NoFamiliesWidget();
 }
 
 class NoFamiliesWidget extends StatefulWidget {
@@ -313,5 +288,38 @@ class _NoFamiliesWidgetState extends State<NoFamiliesWidget> {
     } else {
       print('Failed to download file: ${response.reasonPhrase}');
     }
+  }
+}
+
+Future<void> fetchFamilyDetails(
+    Status familyStatus, int familyId, BuildContext context) async {
+  try {
+    if (familyStatus == Status.Accepted) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              EnrolledAcceptedFamiliesWidget(familyId: familyId),
+        ),
+      );
+    } else if (familyStatus == Status.Rejected) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              EnrolledRejectedFamiliesWidget(familyId: familyId),
+        ),
+      );
+    } else {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              EnrolledPendingFamiliesWidget(familyId: familyId),
+        ),
+      );
+    }
+  } catch (e) {
+    print("Error fetching family details: $e");
   }
 }

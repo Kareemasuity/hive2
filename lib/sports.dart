@@ -35,6 +35,12 @@ class SportsCommitteeScreen extends StatelessWidget {
               SizedBox(
                 height: 30,
               ),
+              IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
               Text(
                 'Sports Committee',
                 textAlign: TextAlign.center,

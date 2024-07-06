@@ -2,9 +2,11 @@
 
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:hive/provider/member_list_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -13,19 +15,68 @@ enum Status { Accepted, Rejected, Pending }
 
 extension StatusExtension on Status {
   int toIndex() {
-    return this.index;
+    switch (this) {
+      case Status.Accepted:
+        return 0;
+      case Status.Rejected:
+        return 1;
+      case Status.Pending:
+        return 2;
+    }
   }
 
   static Status fromIndex(int index) {
-    return Status.values[index];
+    switch (index) {
+      case 0:
+        return Status.Accepted;
+      case 1:
+        return Status.Rejected;
+      case 2:
+        return Status.Pending;
+      default:
+        throw Exception('Invalid status index');
+    }
+  }
+
+  static Status fromValue(dynamic value) {
+    if (value is int) {
+      return fromIndex(value);
+    } else if (value is String) {
+      switch (value.toLowerCase()) {
+        case 'accepted':
+          return Status.Accepted;
+        case 'rejected':
+          return Status.Rejected;
+        case 'pending':
+          return Status.Pending;
+        default:
+          throw Exception('Invalid status value');
+      }
+    } else {
+      throw Exception('Invalid status type');
+    }
   }
 }
 
 enum gender { Male, Female }
 
 extension genderExtension on gender {
+  Map<String, dynamic> toJson() {
+    return {
+      'index': this.index,
+      'name': this.toString().split('.').last,
+    };
+  }
+
   int toIndex() {
     return this.index;
+  }
+
+  static gender fromJson(String json) {
+    return gender.values.firstWhere(
+      (e) => e.toString().split('.').last == json,
+      orElse: () => gender.Male, // Default value or handle missing case
+    );
   }
 
   static gender fromIndex(int index) {
@@ -34,15 +85,15 @@ extension genderExtension on gender {
 }
 
 enum Role {
-  familyRapporteur,
-  SecretaryOfTheFamiliesCommittee,
-  DeputyFamilyRapporteur,
-  SecretaryOfTheSportsCommittee,
-  SecretaryOfTheSocialCommittee,
-  SecretaryOfTheCulturalCommittee,
-  SecretaryOfTheTechnicalCommittee,
-  SecretaryOfTheScientificCommittee,
-  SecretaryOfTheMobileCommitte,
+  FAMILY_COORDINATOR,
+  DEPUTY_FAMILY_COORDINATOR,
+  SPORTS_COMMITTEE_SECRETARY,
+  SOCIAL_COMMITTEE_SECRETARY,
+  CULTURAL_COMMITTEE_SECRETARY,
+  TECHNICAL_COMMITTEE_SECRETARY,
+  SCIENTIFIC_COMMITTEE_SECRETARY,
+  EXPLORERS_COMMITTEE_SECRETARY,
+  FAMILY_COMMITTEE_SECRETARY,
   Member
 }
 
@@ -111,6 +162,8 @@ class AddingFamilyDto {
     print('AddingFamilyDto JSON Payload: $json'); // Debug output
     return json;
   }
+
+  initializeFiles(Map<String, dynamic> json) {}
 }
 
 class CreateAndUpdateFamilyDto {
@@ -151,24 +204,35 @@ class CreateAndUpdateFamilyDto {
   }
 
   Map<String, dynamic> toJson() {
-    final json = {
+    return {
       'name': name,
       'familyMission': familyMission,
       'familyVision': familyVision,
-      'imagePath': _fileToBase64(imagePath),
-      'deanApproval': _fileToBase64(deanApproval),
-      'headApproval': _fileToBase64(headApproval),
-      'viceHeadApproval': _fileToBase64(viceHeadApproval),
+      'imagePath': imagePath,
+      'deanApproval': deanApproval,
+      'headApproval': headApproval,
+      'viceHeadApproval': viceHeadApproval,
       'status': status.toIndex(),
       'familyRulesId': familyRulesId,
     };
-    print('CreateAndUpdateFamilyPlanDto JSON Payload: $json');
-    return json;
   }
 
-  String? _fileToBase64(File? file) {
-    if (file == null) return null;
-    return base64Encode(file.readAsBytesSync());
+  Future<void> initializeFiles() async {
+    imagePath = (await _fetchFile(imagePath as String?)) as File?;
+    deanApproval = (await _fetchFile(deanApproval as String?)) as File?;
+    headApproval = (await _fetchFile(headApproval as String?)) as File?;
+    viceHeadApproval = (await _fetchFile(viceHeadApproval as String?)) as File?;
+  }
+
+  Future<String?> _fetchFile(String? base64Content) async {
+    if (base64Content == null) return null;
+    Uint8List fileBytes = base64Decode(base64Content);
+    final tempDir = await getTemporaryDirectory();
+    String fileName =
+        '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.file';
+    File file = File(fileName);
+    await file.writeAsBytes(fileBytes);
+    return file.path;
   }
 }
 
@@ -280,37 +344,6 @@ class CreateAndUpdateFamilySupervisorsDto {
       'role': role.toIndex(),
     };
     print('AddingFamily Supervisors JSON Payload: $json'); // Debug output
-    return json;
-  }
-}
-
-class FamilySupervisor {
-  String name;
-  String gender;
-  String nationalId;
-  String address;
-  String phoneNumber;
-  String role;
-
-  FamilySupervisor({
-    required this.name,
-    required this.gender,
-    required this.nationalId,
-    required this.address,
-    required this.phoneNumber,
-    required this.role,
-  });
-
-  Map<String, dynamic> toJson() {
-    final json = {
-      'name': name,
-      'gender': gender,
-      'nationalId': nationalId,
-      'address': address,
-      'phoneNumber': phoneNumber,
-      'role': role,
-    };
-    print("Adding Supervisors : $json");
     return json;
   }
 }

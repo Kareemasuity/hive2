@@ -11,7 +11,7 @@ class FamilySupervisorListProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removeSupervisor(FamilySupervisor supervisor) {
+  void removeSupervisor(CreateAndUpdateFamilySupervisorsDto supervisor) {
     _list.remove(supervisor);
     notifyListeners();
   }
