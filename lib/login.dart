@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/data.dart';
+import 'package:hive/families.dart';
+import 'package:hive/family_events.dart';
 import 'package:http/http.dart' as http;
 import 'package:hive/home_page.dart';
 import 'package:hive/sign_up.dart';
@@ -71,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
             // Navigate to home screen
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(builder: (context) => Families()),
             );
           } else {
             // Login failed, show error message

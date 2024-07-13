@@ -195,8 +195,9 @@ class _EnrolledPendingFamiliesWidgetState
                           title: Text(
                               event.currentEventDtos?.englishDescription ??
                                   'N/A'),
-                          subtitle:
-                              Text(event.currentEventDtos?.startDate ?? 'N/A'),
+                          subtitle: Text(
+                              event.currentEventDtos?.startDate as String ??
+                                  'N/A'),
                         );
                       },
                     ),

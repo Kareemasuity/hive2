@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/Data_Models/GetAllCurrentEventsWithoutTrips_data.dart';
 import 'package:hive/data.dart';
 
 import 'package:http/http.dart' as http;
@@ -326,52 +327,91 @@ class FamilyEventEnrollmentDtos {
 class CurrentEventDtos {
   int? currentEventId;
   int? eventStatus;
-  String? startDate;
-  String? endDate;
-  String? formSubmissionDeadline;
+  DateTime? startDate;
+  DateTime? endDate;
+  DateTime? formSubmissionDeadline;
   String? location;
   String? englishDescription;
   String? arabicDescription;
   int? activityId;
   int? eventId;
+  MainEvent? event;
+  List<EventImagesDto?>? eventImages;
+  CurrentEventDtos({
+    this.currentEventId,
+    this.eventStatus,
+    this.startDate,
+    this.endDate,
+    this.formSubmissionDeadline,
+    this.location,
+    this.englishDescription,
+    this.arabicDescription,
+    this.activityId,
+    this.eventId,
+    this.event,
+    this.eventImages,
+  });
 
-  CurrentEventDtos(
-      {this.currentEventId,
-      this.eventStatus,
-      this.startDate,
-      this.endDate,
-      this.formSubmissionDeadline,
-      this.location,
-      this.englishDescription,
-      this.arabicDescription,
-      this.activityId,
-      this.eventId});
-
-  CurrentEventDtos.fromJson(Map<String, dynamic> json) {
-    currentEventId = json['currentEventId'];
-    eventStatus = json['eventStatus'];
-    startDate = json['startDate'];
-    endDate = json['endDate'];
-    formSubmissionDeadline = json['formSubmissionDeadline'];
-    location = json['location'];
-    englishDescription = json['englishDescription'];
-    arabicDescription = json['arabicDescription'];
-    activityId = json['activityId'];
-    eventId = json['eventId'];
+  factory CurrentEventDtos.fromJson(Map<String, dynamic> json) {
+    print(
+        '----------------------------------------------------------Parsing CurrentEvent: $json');
+    try {
+      return CurrentEventDtos(
+        currentEventId: json['currentEventId'],
+        eventStatus: json['eventStatus'],
+        // eventStatus: json['eventStatus'] != null
+        //     ? parseEventStatus(json['eventStatus'])
+        //     : null,
+        startDate: json['startDate'] != null
+            ? DateTime.parse(json['startDate'])
+            : null,
+        endDate:
+            json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
+        formSubmissionDeadline: json['formSubmissionDeadline'] != null
+            ? DateTime.parse(json['formSubmissionDeadline'])
+            : null,
+        location: json['location'],
+        englishDescription: json['englishDescription'],
+        arabicDescription: json['arabicDescription'],
+        activityId: json['activityId'],
+        eventId: json['eventId'],
+        event: json['event'] != null ? MainEvent.fromJson(json['event']) : null,
+        eventImages: json['eventImages'] != null
+            ? List<EventImagesDto>.from(
+                json['eventImages'].map((x) => EventImagesDto.fromJson(x)))
+            : [],
+      );
+    } catch (e) {
+      print('Error parsing CurrentEvent from JSON: $e');
+      throw Exception('Failed to parse CurrentEvent from JSON');
+    }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = {};
     data['currentEventId'] = this.currentEventId;
-    data['eventStatus'] = this.eventStatus;
-    data['startDate'] = this.startDate;
-    data['endDate'] = this.endDate;
-    data['formSubmissionDeadline'] = this.formSubmissionDeadline;
+    if (this.eventStatus != null) {
+      data['eventStatus'] = eventTypeToInt(this.eventStatus!
+          as EventType); // Assuming eventStatusToJson converts enum to int
+    }
+    data['startDate'] =
+        startDate?.toIso8601String(); // Convert DateTime to ISO8601 string
+    data['endDate'] =
+        this.endDate?.toIso8601String(); // Convert DateTime to ISO8601 string
+    data['formSubmissionDeadline'] = this
+        .formSubmissionDeadline
+        ?.toIso8601String(); // Convert DateTime to ISO8601 string
     data['location'] = this.location;
     data['englishDescription'] = this.englishDescription;
     data['arabicDescription'] = this.arabicDescription;
     data['activityId'] = this.activityId;
     data['eventId'] = this.eventId;
+    if (this.event != null) {
+      data['event'] = this.event!.toJson();
+    }
+    if (this.eventImages != null) {
+      data['eventImages'] = this.eventImages!.map((v) => v?.toJson()).toList();
+    }
     return data;
   }
 }

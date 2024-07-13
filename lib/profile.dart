@@ -1,5 +1,6 @@
 import 'package:hive/edit_screen.dart';
-import 'package:hive/image_slider.dart';
+import 'package:hive/home_page.dart';
+
 import 'package:hive/widgets/froward_button.dart';
 import 'package:hive/widgets/setting_item.dart';
 import 'package:hive/widgets/setting_switch.dart';
@@ -24,7 +25,7 @@ class _AccountScreenState extends State<AccountScreen> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ImageSliders()),
+              MaterialPageRoute(builder: (context) => HomePage()),
             );
           },
           icon: const Icon(Ionicons.chevron_back_outline),

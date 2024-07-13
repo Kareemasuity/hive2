@@ -26,6 +26,9 @@ class _FamiliesState extends State<Families> {
   late FamilyResponseDto family;
   late Status familyStatus;
   final storage = new FlutterSecureStorage();
+  bool _shouldNavigate = true;
+
+  late Role userRole;
 
   Future<String?> _getToken() async {
     return await storage.read(key: 'access_token');
@@ -102,19 +105,137 @@ class _FamiliesState extends State<Families> {
                 "-----------------------------------------------myFamily function called");
             familyStatus =
                 family.familyDto.status; // Ensure familyStatus is correctly set
+            userRole = family.familyEnrollmentDto.role;
             print(
                 "---------------------------------------------------$familyStatus");
             // Call fetchFamilyDetails after the UI build phase is complete
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              fetchFamilyDetails(
-                  familyStatus, family.familyDto.familyId, context);
-            });
-
-            // Alternatively, call a method that returns a widget
-            // _navigateToFamilyPage(context, familyStatus, family);
-
-            // Returning an empty container while navigating
-            return Container();
+            if (_shouldNavigate) {
+              _shouldNavigate = false; // Prevent re-triggering navigation
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                fetchFamilyDetails(
+                    familyStatus, family.familyDto.familyId, context, userRole);
+              });
+            }
+            if (familyStatus == Status.Accepted) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color.fromARGB(66, 57, 49, 81),
+                          blurRadius: 10,
+                          offset: Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'You have enrolled at a family, tap on the button to check your activities and enrollements now',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    EnrolledAcceptedFamiliesWidget(
+                                        familyId: family.familyDto.familyId),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 1, 52, 130),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text(
+                            'Show Family information',
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            } else if (familyStatus == Status.Pending) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color.fromARGB(66, 57, 49, 81),
+                          blurRadius: 10,
+                          offset: Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'You have family is pending',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    EnrolledPendingFamiliesWidget(
+                                        familyId: family.familyDto.familyId),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 1, 52, 130),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text(
+                            'Show Family information',
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            } else
+              return _buildNoFamiliesWidget();
           } else {
             // Calling a method that returns a widget
             return _buildNoFamiliesWidget();
@@ -291,8 +412,8 @@ class _NoFamiliesWidgetState extends State<NoFamiliesWidget> {
   }
 }
 
-Future<void> fetchFamilyDetails(
-    Status familyStatus, int familyId, BuildContext context) async {
+Future<void> fetchFamilyDetails(Status familyStatus, int familyId,
+    BuildContext context, Role userRole) async {
   try {
     if (familyStatus == Status.Accepted) {
       await Navigator.push(
@@ -302,7 +423,8 @@ Future<void> fetchFamilyDetails(
               EnrolledAcceptedFamiliesWidget(familyId: familyId),
         ),
       );
-    } else if (familyStatus == Status.Rejected) {
+    } else if (familyStatus == Status.Rejected &&
+        userRole == Role.FAMILY_COORDINATOR) {
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -310,7 +432,8 @@ Future<void> fetchFamilyDetails(
               EnrolledRejectedFamiliesWidget(familyId: familyId),
         ),
       );
-    } else {
+    } else if (familyStatus == Status.Pending &&
+        userRole == Role.FAMILY_COORDINATOR) {
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -318,6 +441,8 @@ Future<void> fetchFamilyDetails(
               EnrolledPendingFamiliesWidget(familyId: familyId),
         ),
       );
+    } else {
+      return;
     }
   } catch (e) {
     print("Error fetching family details: $e");

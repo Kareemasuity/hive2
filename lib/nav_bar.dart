@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive/image_slider.dart';
+
 // ignore: unused_import
 import 'package:hive/notifactions.dart';
 import 'package:hive/profile.dart';
@@ -9,7 +9,6 @@ import 'package:hive/trips_page.dart';
 // ignore: must_be_immutable
 class CustomBottomMenu extends StatefulWidget {
   List<Widget> screens = [
-    ImageSliders(),
     Settings(),
     tripsPage(),
     AccountScreen(),

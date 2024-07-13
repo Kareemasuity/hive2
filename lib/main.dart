@@ -8,7 +8,7 @@ import 'package:hive/culture.dart';
 import 'package:hive/families.dart';
 import 'package:hive/families_form.dart';
 // ignore: unused_import
-import 'package:hive/image_slider.dart';
+
 // ignore: unused_import
 import 'package:hive/login.dart';
 import 'package:hive/other_activities.dart';

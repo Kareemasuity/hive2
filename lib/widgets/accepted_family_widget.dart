@@ -1,6 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:hive/family_events.dart';
 //import 'package:hive/myFamily_response_data.dart';
 import 'package:hive/pendAcceptFamily_GetFamily_data.dart';
+import 'package:hive/family_activities.dart';
 import 'package:intl/intl.dart';
 
 // Assuming you have your NewFamilyDto and other related classes defined as in the previous response
@@ -22,9 +26,16 @@ class _EnrolledAcceptedFamiliesWidgetState
     extends State<EnrolledAcceptedFamiliesWidget> {
   late Future<GetFamilyWithDetailsDto> _futureFamilyDetails;
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _futureFamilyDetails = fetchFamilyDetails(widget.familyId);
+  // }
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Fetch family details whenever the dependencies change (i.e., every time the widget is displayed)
     _futureFamilyDetails = fetchFamilyDetails(widget.familyId);
   }
 
@@ -45,7 +56,7 @@ class _EnrolledAcceptedFamiliesWidgetState
           return Scaffold(
             appBar: AppBar(
               title: Text(
-                'Your family is Pending',
+                'Your family is Accepted',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
@@ -122,12 +133,12 @@ class _EnrolledAcceptedFamiliesWidgetState
                                   ),
                                   SizedBox(height: 6),
                                   Text(
-                                    'Start Date: ${plan.startDate ?? 'N/A'}',
+                                    'Start Date: ${DateFormat('dd-MM-yyyy').format(DateTime.parse(plan.startDate!)) ?? 'N/A'}',
                                     style: TextStyle(fontSize: 16),
                                   ),
                                   SizedBox(height: 6),
                                   Text(
-                                    'End Date: ${plan.endDate ?? 'N/A'}',
+                                    'End Date: ${DateFormat('dd-MM-yyyy').format(DateTime.parse(plan.endDate!)) ?? 'N/A'}',
                                     style: TextStyle(fontSize: 16),
                                   ),
                                   SizedBox(height: 12),
@@ -149,11 +160,6 @@ class _EnrolledAcceptedFamiliesWidgetState
                           .map((enrollment) => Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Entity Activity ID: ${enrollment.entityActivityId ?? 'N/A'}',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  SizedBox(height: 6),
                                   if (enrollment.entityActivityDto != null)
                                     Column(
                                       crossAxisAlignment:
@@ -195,14 +201,91 @@ class _EnrolledAcceptedFamiliesWidgetState
                           title: Text(
                               event.currentEventDtos?.englishDescription ??
                                   'N/A'),
-                          subtitle:
-                              Text(event.currentEventDtos?.startDate ?? 'N/A'),
+                          subtitle: Text(
+                              event.currentEventDtos?.startDate as String ??
+                                  'N/A'),
                         );
                       },
                     ),
                   if (familyDetails.familyEventEnrollmentDtos == null ||
                       familyDetails.familyEventEnrollmentDtos!.isEmpty)
                     Text('No family event enrollments found'),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment(-0.68, -0.74),
+                            end: Alignment(0.68, 0.74),
+                            colors: [
+                              Color(0xFF9DA9DF),
+                              Color(0xFF27B5D4),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(
+                              20), // Match your desired border radius
+                        ),
+                        child: ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.transparent),
+                              shadowColor:
+                                  MaterialStateProperty.all(Colors.transparent),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FamilyActivities(
+                                      familyId: widget.familyId),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "Available Activities",
+                              style: TextStyle(color: Colors.white),
+                            )),
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment(-0.68, -0.74),
+                            end: Alignment(0.68, 0.74),
+                            colors: [
+                              Color(0xFF9DA9DF),
+                              Color(0xFF27B5D4),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(
+                              20), // Match your desired border radius
+                        ),
+                        child: ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.transparent),
+                              shadowColor:
+                                  MaterialStateProperty.all(Colors.transparent),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      FamilyEvents(familyId: widget.familyId),
+                                ),
+                              );
+                            },
+                            child: Text("Available Events",
+                                style: TextStyle(color: Colors.white))),
+                      )
+                    ],
+                  )
                 ],
               ),
             ),
