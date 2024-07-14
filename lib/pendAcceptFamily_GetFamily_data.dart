@@ -1,5 +1,6 @@
 // FamilyDto class
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/Data_Models/GetAllCurrentEventsWithoutTrips_data.dart';
@@ -199,13 +200,20 @@ class FamilyActivityEnrollmentDtos {
       this.entityActivityDto,
       this.familyId});
 
-  FamilyActivityEnrollmentDtos.fromJson(Map<String, dynamic> json) {
-    familyActivityEnrollmentId = json['familyActivityEnrollmentId'];
-    entityActivityId = json['entityActivityId'];
-    entityActivityDto = json['entityActivityDto'] != null
-        ? new EntityActivityDto.fromJson(json['entityActivityDto'])
-        : null;
-    familyId = json['familyId'];
+  factory FamilyActivityEnrollmentDtos.fromJson(Map<String, dynamic> json) {
+    try {
+      return FamilyActivityEnrollmentDtos(
+        familyActivityEnrollmentId: json['familyActivityEnrollmentId'],
+        entityActivityId: json['entityActivityId'],
+        entityActivityDto: json['entityActivityDto'] != null
+            ? EntityActivityDto.fromJson(json['entityActivityDto'])
+            : null,
+        familyId: json['familyId'],
+      );
+    } catch (e) {
+      print('Error parsing FamilyActivityEnrollmentDtos: $e');
+      return FamilyActivityEnrollmentDtos();
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -256,7 +264,9 @@ class Activity {
   String? arabicName;
   String? englishDescription;
   String? arabicDescription;
-
+  ActivityType? activityType;
+  String? imagePath;
+  CommitteeDto? committy;
   Activity(
       {this.activityId,
       this.englishName,
@@ -270,44 +280,123 @@ class Activity {
     arabicName = json['arabicName'];
     englishDescription = json['englishDescription'];
     arabicDescription = json['arabicDescription'];
+    activityType = activityTypeFromInt(json['activityType']);
+    imagePath = json['imagePath'];
+    committy = json['committy'] != null
+        ? CommitteeDto.fromJson(json['committy'])
+        : null;
   }
-
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['activityId'] = this.activityId;
-    data['englishName'] = this.englishName;
-    data['arabicName'] = this.arabicName;
-    data['englishDescription'] = this.englishDescription;
-    data['arabicDescription'] = this.arabicDescription;
+    final Map<String, dynamic> data = {
+      'activityId': activityId,
+      'englishName': englishName,
+      'arabicName': arabicName,
+      'englishDescription': englishDescription,
+      'arabicDescription': arabicDescription,
+      'activityType': activityType?.index, // Convert enum to int
+      'imagePath': imagePath,
+      'committy': committy?.toJson(),
+    };
     return data;
   }
 }
 
+class CommitteeDto {
+  int committeeId;
+  String englishName;
+  String arabicName;
+  String englishDescription;
+  String arabicDescription;
+
+  CommitteeDto({
+    required this.committeeId,
+    required this.englishName,
+    required this.arabicName,
+    required this.englishDescription,
+    required this.arabicDescription,
+  });
+
+  // Factory method to create CommitteeDto from JSON
+  factory CommitteeDto.fromJson(Map<String, dynamic> json) {
+    return CommitteeDto(
+      committeeId: json['committeeId'],
+      englishName: json['englishName'],
+      arabicName: json['arabicName'],
+      englishDescription: json['englishDescription'],
+      arabicDescription: json['arabicDescription'],
+    );
+  }
+
+  // Method to convert CommitteeDto to JSON map
+  Map<String, dynamic> toJson() {
+    return {
+      'committeeId': committeeId,
+      'englishName': englishName,
+      'arabicName': arabicName,
+      'englishDescription': englishDescription,
+      'arabicDescription': arabicDescription,
+    };
+  }
+}
+
+enum ActivityType {
+  Individual,
+  Collective,
+}
+
+// Function to convert from int to enum
+ActivityType activityTypeFromInt(int value) {
+  switch (value) {
+    case 0:
+      return ActivityType.Individual;
+    case 1:
+      return ActivityType.Collective;
+    default:
+      throw ArgumentError('Unknown ActivityType value: $value');
+  }
+}
+
+// Function to convert from enum to int
+int activityTypeToInt(ActivityType type) {
+  return type.index;
+}
+
 class FamilyEventEnrollmentDtos {
   int? familyEventEnrollmentId;
-  Null? rate;
-  int? status;
+  FamilyRole? role;
+  Double? rate;
+  Status? status;
   int? familyId;
   int? currentEventId;
   CurrentEventDtos? currentEventDtos;
 
   FamilyEventEnrollmentDtos(
       {this.familyEventEnrollmentId,
+      this.role,
       this.rate,
       this.status,
       this.familyId,
       this.currentEventId,
       this.currentEventDtos});
 
-  FamilyEventEnrollmentDtos.fromJson(Map<String, dynamic> json) {
-    familyEventEnrollmentId = json['familyEventEnrollmentId'];
-    rate = json['rate'];
-    status = json['status'];
-    familyId = json['familyId'];
-    currentEventId = json['currentEventId'];
-    currentEventDtos = json['currentEventDtos'] != null
-        ? new CurrentEventDtos.fromJson(json['currentEventDtos'])
-        : null;
+  factory FamilyEventEnrollmentDtos.fromJson(Map<String, dynamic> json) {
+    try {
+      return FamilyEventEnrollmentDtos(
+        familyEventEnrollmentId: json['familyEventEnrollmentId'],
+        role: familyRoleFromInt(json['role']), // Convert int to FamilyRole
+        rate: json['rate']?.toDouble(), // Handle double conversion
+        status: StatusExtension.fromIndex(
+            json['status']), // Convert int to Status enum
+        familyId: json['familyId'],
+        currentEventId: json['currentEventId'],
+        currentEventDtos: json['currentEventDtos'] != null
+            ? CurrentEventDtos.fromJson(json['currentEventDtos'])
+            : null,
+      );
+    } catch (e) {
+      print('Error parsing FamilyEventEnrollmentDtos: $e');
+      return FamilyEventEnrollmentDtos();
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -321,6 +410,23 @@ class FamilyEventEnrollmentDtos {
       data['currentEventDtos'] = this.currentEventDtos!.toJson();
     }
     return data;
+  }
+}
+
+enum FamilyRole {
+  organizers,
+  participants,
+}
+
+// Function to convert int to FamilyRole enum
+FamilyRole familyRoleFromInt(int? value) {
+  switch (value) {
+    case 0:
+      return FamilyRole.organizers;
+    case 1:
+      return FamilyRole.participants;
+    default:
+      throw ArgumentError('Unknown FamilyRole value: $value');
   }
 }
 

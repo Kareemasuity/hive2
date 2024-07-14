@@ -107,21 +107,22 @@ class _FamilyActivitiesState extends State<FamilyActivities> {
     futureEntityActivities = getEntityActivitiesForFamilies(widget.familyId);
   }
 
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   // Fetch data every time the widget is rebuilt
+  //   _fetchCommittees();
+  //   futureEntityActivities = getEntityActivitiesForFamilies(widget.familyId);
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
           "Available Activities",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 28,
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w700,
-            height: 0.03,
-          ),
         ),
-        backgroundColor: const Color.fromARGB(255, 1, 52, 130),
+        // backgroundColor: const Color.fromARGB(255, 1, 52, 130),
       ),
       body: Column(
         children: [
@@ -222,7 +223,7 @@ class _FamilyActivitiesState extends State<FamilyActivities> {
                                             gravity: ToastGravity.BOTTOM,
                                             timeInSecForIosWeb: 1,
                                             backgroundColor: Color.fromARGB(
-                                                163, 39, 180, 212),
+                                                162, 33, 249, 37),
                                             textColor: Colors.white,
                                             fontSize: 16.0,
                                           );

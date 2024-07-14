@@ -25,6 +25,14 @@ class _FamilyEventsState extends State<FamilyEvents> {
         getAllCurrentEventsWithoutTrips(widget.familyId);
   }
 
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+
+  //   allCurrentEventsWithoutTrips =
+  //       getAllCurrentEventsWithoutTrips(widget.familyId);
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,15 +96,19 @@ class _FamilyEventsState extends State<FamilyEvents> {
                                 CreateAndUpdateFamilyEventEnrollmentDto(
                               familyId: widget.familyId,
                               rate: null,
-                              role: 'Participants',
+                              role: 1,
                               currentEventId:
                                   event.currentEvent?.currentEventId ?? 0,
                             );
+
                             try {
+                              await createFamilyEventEnrollment(
+                                  enrollmentDto); // Wait for enrollment to complete
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content: Text(
-                                        'Enrollment created successfully')),
+                                  content:
+                                      Text('Enrollment created successfully'),
+                                ),
                               );
                               Navigator.pop(context);
                             } catch (e) {
@@ -140,14 +152,30 @@ class _FamilyEventsState extends State<FamilyEvents> {
   }
 }
 
-Future<http.Response> createFamilyEventEnrollment(
+Future<http.Response?> createFamilyEventEnrollment(
     CreateAndUpdateFamilyEventEnrollmentDto enrollmentDto) async {
-  final Apiurl = Uri.parse(
-      '$url/api/FamilyEventEnrollment/CreateFamilyEventEnrollment'); // Replace with your actual API endpoint
-  final headers = {'Content-Type': 'application/json'};
+  final storage = FlutterSecureStorage();
+  Future<String?> getToken() async {
+    return await storage.read(key: 'access_token');
+  }
+
+  String? token = await getToken();
+
+  if (token == null) {
+    print('Token not found');
+    return null;
+  }
+  final headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token', // Include the JWT token here
+  };
+
   final body = jsonEncode(enrollmentDto.toJson());
 
-  final response = await http.post(Apiurl, headers: headers, body: body);
+  final response = await http.post(
+      Uri.parse("$url/api/FamilyEventEnrollment/CreateFamilyEventEnrollment"),
+      headers: headers,
+      body: body);
 
   if (response.statusCode == 200) {
     return response;
@@ -160,13 +188,13 @@ Future<http.Response> createFamilyEventEnrollment(
 class CreateAndUpdateFamilyEventEnrollmentDto {
   int familyId;
   double? rate;
-  String role;
+  int? role;
   int currentEventId;
 
   CreateAndUpdateFamilyEventEnrollmentDto({
     required this.familyId,
     this.rate,
-    this.role = "Participants",
+    this.role,
     required this.currentEventId,
   });
 

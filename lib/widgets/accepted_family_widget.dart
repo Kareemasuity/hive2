@@ -5,6 +5,7 @@ import 'package:hive/family_events.dart';
 //import 'package:hive/myFamily_response_data.dart';
 import 'package:hive/pendAcceptFamily_GetFamily_data.dart';
 import 'package:hive/family_activities.dart';
+import 'package:hive/widgets/familyActivitiesAndEventEnrollement.dart';
 import 'package:intl/intl.dart';
 
 // Assuming you have your NewFamilyDto and other related classes defined as in the previous response
@@ -26,11 +27,11 @@ class _EnrolledAcceptedFamiliesWidgetState
     extends State<EnrolledAcceptedFamiliesWidget> {
   late Future<GetFamilyWithDetailsDto> _futureFamilyDetails;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _futureFamilyDetails = fetchFamilyDetails(widget.familyId);
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _futureFamilyDetails = fetchFamilyDetails(widget.familyId);
+  }
 
   @override
   void didChangeDependencies() {
@@ -52,21 +53,18 @@ class _EnrolledAcceptedFamiliesWidgetState
           return Center(child: Text('No data available'));
         } else {
           final GetFamilyWithDetailsDto familyDetails = snapshot.data!;
+          print("---------------------------------------$familyDetails");
+          print(
+              '--------------------------------------------------------Family Activity Enrollment DTOs: ${familyDetails.familyActivityEnrollmentDtos}');
+          print(
+              '--------------------------------------------------------Family Event Enrollment DTOs: ${familyDetails.familyEventEnrollmentDtos}');
 
           return Scaffold(
             appBar: AppBar(
               title: Text(
                 'Your family is Accepted',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontWeight: FontWeight.w700,
-                  height: 0.03,
-                ),
               ),
-              backgroundColor: const Color.fromARGB(255, 1, 52, 130),
             ),
             body: SingleChildScrollView(
               padding: EdgeInsets.all(16.0),
@@ -78,15 +76,27 @@ class _EnrolledAcceptedFamiliesWidgetState
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 12),
-                  Text(
-                    'Family Mission: ${familyDetails.familyDto?.familyMission ?? 'N/A'}',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  Column(children: [
+                    Text(
+                      'Family Mission:',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Text(' ${familyDetails.familyDto?.familyMission ?? 'N/A'}',
+                        style: TextStyle(fontSize: 16)),
+                  ]),
                   SizedBox(height: 12),
-                  Text(
-                    'Family Vision: ${familyDetails.familyDto?.familyVision ?? 'N/A'}',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  Column(children: [
+                    Text(
+                      'Family Vision: ',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      ' ${familyDetails.familyDto?.familyVision ?? 'N/A'}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ]),
                   SizedBox(height: 24),
                   Text(
                     'Family Members:',
@@ -147,72 +157,118 @@ class _EnrolledAcceptedFamiliesWidgetState
                           .toList(),
                     ),
                   SizedBox(height: 24),
-                  Text(
-                    'Family Activity Enrollments:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 12),
-                  if (familyDetails.familyActivityEnrollmentDtos != null &&
-                      familyDetails.familyActivityEnrollmentDtos!.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: familyDetails.familyActivityEnrollmentDtos!
-                          .map((enrollment) => Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (enrollment.entityActivityDto != null)
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Activity Name: ${enrollment.entityActivityDto!.activity?.englishName ?? 'N/A'}',
-                                          style: TextStyle(fontSize: 16),
-                                        ),
-                                        SizedBox(height: 6),
-                                        Text(
-                                          'Activity Description: ${enrollment.entityActivityDto!.activity?.englishDescription ?? 'N/A'}',
-                                          style: TextStyle(fontSize: 16),
-                                        ),
-                                        SizedBox(height: 6),
-                                      ],
-                                    ),
-                                  SizedBox(height: 12),
-                                ],
-                              ))
-                          .toList(),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              FamilyActivitiesAndEventsEnrollements(
+                                  familyId: widget.familyId),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        width: 500,
+                        height: 50,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                              child: Text(
+                            "Go to your enrolled activities and events",
+                            style: TextStyle(fontSize: 16),
+                          )),
+                        ),
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 217, 238, 255),
+                          borderRadius: BorderRadius.circular(5.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color.fromARGB(66, 57, 49, 81),
+                              blurRadius: 10,
+                              offset: Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
+                  ),
+                  // Text(
+                  //   'Family Activity Enrollments:',
+                  //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  // ),
+                  // SizedBox(height: 6,),
+                  // Text("Event description"),
+                  // SizedBox(height: 12),
+                  // if (familyDetails.familyActivityEnrollmentDtos != null &&
+                  //     familyDetails.familyActivityEnrollmentDtos!.isNotEmpty)
+                  //   Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: familyDetails.familyActivityEnrollmentDtos!
+                  //         .map((enrollment) => Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 if (enrollment.entityActivityDto != null &&
+                  //                     enrollment.entityActivityDto!.activity !=
+                  //                         null)
+                  //                   Column(
+                  //                     crossAxisAlignment:
+                  //                         CrossAxisAlignment.start,
+                  //                     children: [
+                  //                       Text(
+                  //                         'Activity Name: ${enrollment.entityActivityDto!.activity!.englishName ?? 'N/A'}',
+                  //                         style: TextStyle(fontSize: 16),
+                  //                       ),
+                  //                       SizedBox(height: 6),
+                  //                       Text(
+                  //                         'Activity Description: ${enrollment.entityActivityDto!.activity!.englishDescription ?? 'N/A'}',
+                  //                         style: TextStyle(fontSize: 16),
+                  //                       ),
+                  //                       SizedBox(height: 6),
+                  //                     ],
+                  //                   ),
+                  //                 SizedBox(height: 12),
+                  //               ],
+                  //             ))
+                  //         .toList(),
+                  //   ),
+                  // SizedBox(height: 24),
+                  // Text(
+                  //   'Family Event Enrollments:',
+                  //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  // ),
+                  // SizedBox(height: 12),
+                  // if (familyDetails.familyEventEnrollmentDtos != null &&
+                  //     familyDetails.familyEventEnrollmentDtos!.isNotEmpty)
+                  //   ListView.builder(
+                  //     shrinkWrap: true,
+                  //     itemCount:
+                  //         familyDetails.familyEventEnrollmentDtos!.length,
+                  //     itemBuilder: (context, index) {
+                  //       var event =
+                  //           familyDetails.familyEventEnrollmentDtos![index];
+                  //       return ListTile(
+                  //         title: Text(
+                  //           event.currentEventDtos?.englishDescription ?? 'N/A',
+                  //           style: TextStyle(color: Colors.black),
+                  //         ),
+                  //         subtitle: Text(
+                  //           event.currentEventDtos?.startDate as String ??
+                  //               'N/A',
+                  //           style: TextStyle(color: Colors.black54),
+                  //         ),
+                  //       );
+                  //     },
+                  //   ),
+                  // if (familyDetails.familyEventEnrollmentDtos == null ||
+                  //     familyDetails.familyEventEnrollmentDtos!.isEmpty)
+                  //   Text('No family event enrollments found'),
+                  // SizedBox(
+                  //   height: 10,
+                  // ),
                   SizedBox(height: 24),
-                  Text(
-                    'Family Event Enrollments:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 12),
-                  if (familyDetails.familyEventEnrollmentDtos != null &&
-                      familyDetails.familyEventEnrollmentDtos!.isNotEmpty)
-                    ListView.builder(
-                      shrinkWrap: true,
-                      itemCount:
-                          familyDetails.familyEventEnrollmentDtos!.length,
-                      itemBuilder: (context, index) {
-                        var event =
-                            familyDetails.familyEventEnrollmentDtos![index];
-                        return ListTile(
-                          title: Text(
-                              event.currentEventDtos?.englishDescription ??
-                                  'N/A'),
-                          subtitle: Text(
-                              event.currentEventDtos?.startDate as String ??
-                                  'N/A'),
-                        );
-                      },
-                    ),
-                  if (familyDetails.familyEventEnrollmentDtos == null ||
-                      familyDetails.familyEventEnrollmentDtos!.isEmpty)
-                    Text('No family event enrollments found'),
-                  SizedBox(
-                    height: 10,
-                  ),
                   Row(
                     children: [
                       DecoratedBox(
@@ -285,7 +341,7 @@ class _EnrolledAcceptedFamiliesWidgetState
                                 style: TextStyle(color: Colors.white))),
                       )
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
